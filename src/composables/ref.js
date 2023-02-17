@@ -18,19 +18,6 @@ export let modelConfig = ref( "google_vision");
 
 export let model = ref(null)
 export let isLiveStream = ref(false)
-export let isModelReady = ref(false)
+export let isModelReady = ref(true)
 
-export const setLabelPair = ({ lbl, trnslt, gss }) => {
-  label.value = lbl;
-  translation.value = trnslt;
-  guesses.value = gss;
-};
-
-export const loading = computed(() => isModelReady.value || isSnapping.value )
-
-export const showError = (error) => {
-  cameraError.value = true
-  errorMessage.value = error
-  isSnapping.value = false
-  throw error
-}
+export let facingMode = ref('environment')

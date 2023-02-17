@@ -4,6 +4,7 @@ const queryLangs = window.location.search.slice(1);
 export const langList = queryLangs
   ? queryLangs.split(",")
   : [
+    "english",
     "indonesia",
     "spanish",
     "french",
@@ -30,5 +31,5 @@ export const langMap = {
   hindi: "hi",
 };
 
-export let activeLang = ref(langList[0]);
+export let sourceLang = ref(langList[0]);
 export let targetLang = ref(langList[1]);

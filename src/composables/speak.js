@@ -1,4 +1,4 @@
-import { showError } from "./ref";
+import { showError, endSnap, showNotif } from "./helpers";
 
 
 const { speechSynthesis, SpeechSynthesisUtterance } = window;
@@ -7,8 +7,6 @@ const speechSupport = speechSynthesis && SpeechSynthesisUtterance;
 
 let voices = speechSupport ? speechSynthesis.getVoices() : [];
 let voiceMap = null;
-
-
 
 if (voices.length) {
   setVoiceMap(voices);
@@ -32,7 +30,7 @@ export const speak = (text, lang, cb) => {
     cb && msg.addEventListener("end", cb);
 
   } catch (error) {
-    showError('Your browser doesnt support speak syntesis and speak support, please use Google Chrome, Safari or Mozilla Firefox')
+    showNotif({ type: 'warn', text: 'Your browser doesnt support speak syntesis and speak support, please use Google Chrome, Safari or Mozilla Firefox'})
   }
 
   if (text) {
@@ -40,6 +38,9 @@ export const speak = (text, lang, cb) => {
   } else {
     cb && cb();
   }
+
+  setTimeout(endSnap(), 200);
+
 };
 
 const setVoiceMap = (voiceList) => {

@@ -1,23 +1,17 @@
-import xhr from "xhr";
-import he from "he";
-import { apiUrls } from "@/config";
 import { speak } from "./speak"
-import { label, translation, guesses, setLabelPair } from "./ref"
-import { activeLang, langMap, targetLang } from "./lang"
+import { sourceLang, targetLang } from "./lang"
+import {  setLabelPair } from "./helpers"
+import { translateRequest, onTranslateFail } from "./api"
 
 const filterLong = true;
 const lengthLimit = 8;
 
-let cache = ref({});
+export let cache = ref({});
 
-const onTranslateFail = () => setLabelPair({ lbl: "?", trnslt: "?", gss: "?" });
-
-export const translate = (raw) => {
+export const translate =  async (raw) => {
   if (!raw.length) {
     return onTranslateFail();
   }
-
-  const translateTimeStart = new Date().getTime()
 
   const labels = raw.map((l) => l.description);
 
@@ -32,21 +26,52 @@ export const translate = (raw) => {
     .map((o) => `${o.description}: ${Math.round(o.score * 100)}%`)
     .join(", ");
 
-  let term = filtered[0];
+  let term = filtered[0]
 
-  if (!cache.value[activeLang.value]) {
-    cache.value[activeLang.value] = {};
+  if (!cache.value[term]) {
+    cache.value[term] = {
+      source: {},
+      target: {}
+    }
   }
 
-  const cacheHit = cache.value[activeLang.value][term];
+  let sourceTranslated
 
-  if (cacheHit) {
-    setLabelPair({ lbl: he.decode(term), trnslt: cacheHit, gss });
-    speak(cacheHit, activeLang.value, speak.bind(null, term, targetLang.value));
+  let sourceCacheHit = cache.value[term].source[sourceLang.value];
+  let targetCacheHit = cache.value[term].target[targetLang.value];
+
+  try {
+    if ( sourceLang.value !== 'english' ) {
+      sourceTranslated =  await translateRequest(term, 'english', sourceLang.value)
+    }
+    else {
+      sourceTranslated = term
+    }
+    cache.value[term].source[sourceLang.value] = sourceTranslated;
+  } catch (error) {
+    onTranslateFail();
+    throw error
+  }
+
+  console.log(cache.value);
+
+  if (sourceCacheHit && targetCacheHit) {
+    console.log('cache hit!');
+    setLabelPair({ lbl: sourceCacheHit, trnslt: targetCacheHit, gss });
+    speak(targetCacheHit, targetLang.value, speak.bind(null, sourceCacheHit, sourceLang.value));
     return;
   } else {
-    /* TESTING PURPOSES */
-    const body = {
+    const targetTranslated = await translateRequest(sourceTranslated, sourceLang.value, targetLang.value)
+    cache.value[term].target[targetLang.value]  = targetTranslated
+
+    setLabelPair({ lbl: sourceTranslated, trnslt: targetTranslated, gss });
+    speak(targetTranslated, targetLang.value, speak.bind(null,  sourceTranslated, sourceLang.value));
+  }
+
+};
+
+/* TESTING PURPOSES */
+/*     const body = {
       data: {
         translations: [
           {
@@ -60,40 +85,16 @@ export const translate = (raw) => {
     setLabelPair({ lbl: he.decode(term), trnslt: result, gss });
     speak(
       he.decode(body.data.translations[0].translatedText),
-      activeLang.value,
+      sourceLang.value,
       speak.bind(null, term, targetLang.value)
-    );
+    ); */
 
-    /* END OF TESTING */
+/* END OF TESTING */
 
-    /*     cache[activeLang.value][term] = result;
+/* cache[sourceLang.value][term] = result;
 
-        Object.assign(cache, {
-          [activeLang.value]: {
-            [term]: result,
-          },
-        }); */
-
-    /*  xhr.get(
-       `${apiUrls.translate}&q=${term}&source=en&target=${langMap[activeLang.value]}`,
-       (err, res, body) => {
-         if (err) {
-           return onTranslateFail();
-         }
-         const translation = he.decode(
-           JSON.parse(body).data.translations[0].translatedText
-         );
-
-         // cache[activeLang.value][term] = translation;
-
-         setLabelPair({ lbl: he.decode(term), trnslt: translation, gss });
-         //setLabelPair({ lbl: he.decode(term), trnslt: cacheHit, gss });
-
-         const translateTimeEnd = new Date().getTime()
-         console.log('translate %s second', (translateTimeEnd - translateTimeStart)/1000);
-
-         speak(translation, activeLang.value, speak.bind(null, term, targetLang.value));
-       }
-     ); */
-  }
-};
+    Object.assign(cache, {
+      [sourceLang.value]: {
+        [term]: result,
+      },
+    }); */

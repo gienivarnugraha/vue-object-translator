@@ -3,7 +3,7 @@
     <svg id="spinner" width="65px" height="65px" viewBox="0 0 66 66">
       <circle />
     </svg>
-    <div class="text">
+    <div class="caption">
       <slot></slot>
     </div>
   </div>
@@ -25,7 +25,7 @@
 }
 
 #spinner,
-.text {
+.caption {
   position: relative;
   transition: opacity 0.3s ease-out;
   opacity: 1;
@@ -39,7 +39,7 @@
   transform: translateY(-50%) translateX(-45%);
 }
 
-.text {
+.caption {
   top: 60%;
   transform: translateY(-60%);
 }

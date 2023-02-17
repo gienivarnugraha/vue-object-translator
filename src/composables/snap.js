@@ -1,10 +1,9 @@
-import xhr from "xhr";
-import { apiUrls } from "@/config";
-
 import { translate } from "./translate"
-import { label, translation, guesses, isSnapping, firstTime, modelConfig ,showError, performance} from "./ref"
+import { modelConfig } from "./ref"
 import { video, canvas, ctx } from "./camera"
 import { detectObjects } from "./model"
+import { startSnap, showNotif } from "./helpers"
+import { detectRequest } from "./api"
 
 const breakPoint = 800;
 const canvSize = 640;
@@ -12,35 +11,25 @@ const targetPct = 0.7;
 const targetTop = 0.4;
 
 
-
-const startSnap = () => {
-  isSnapping.value = true;
-  firstTime.value = false;
-  return new Date().getTime()
-};
-
-const endSnap = (start) => {
-  isSnapping.value = false;
-  const end = new Date().getTime()
-  performance.value =  (end - start) / 1000
-
-};
-
-export const snap = () => {
-  const start = startSnap();
+export const snap = async () => {
+  startSnap();
 
   if (modelConfig.value !== 'google_vision') {
-    detectObjects(video.value).then(predictions => {
+    try {
+      const predictions = await detectObjects(video.value)
+
+      console.log(predictions);
+
       let labels = predictions.map((prediction) => prediction = {
         'description': prediction.class,
         'score': prediction.score,
       }).sort((labelA, labelB) => labelB.score - labelA.score)
 
       translate(labels);
-    }).catch(err => {
-      showError(`failed to detect object ${err} `);
-      console.log(err);
-    })
+
+    } catch (error) {
+      showNotif({ type: 'error', text: `failed to load the model ${error}` })
+    }
 
   } else {
     const winW = window.innerWidth;
@@ -75,84 +64,8 @@ export const snap = () => {
       .toDataURL("image/jpeg", 1)
       .replace("data:image/jpeg;base64,", "");
 
-    const body = {
-      responses: [
-        {
-          labelAnnotations: [
-            {
-              mid: "/m/03q69",
-              description: "Hair",
-              score: 0.9850375,
-              topicality: 0.9850375,
-            },
-            {
-              mid: "/m/04hgtk",
-              description: "Head",
-              score: 0.97214437,
-              topicality: 0.97214437,
-            },
-            {
-              mid: "/m/014sv8",
-              description: "Eye",
-              score: 0.93755245,
-              topicality: 0.93755245,
-            },
-            {
-              mid: "/m/03f52z",
-              description: "Eyelash",
-              score: 0.8961158,
-              topicality: 0.8961158,
-            }
-
-          ],
-        },
-      ],
-    };
-
-    let labels = body.responses[0].labelAnnotations;
+    const labels = await detectRequest(image)
 
     translate(labels);
-
-
-    /*
-    xhr.post(
-      apiUrls.cloudVision,
-      {
-        json: {
-          requests: [
-            {
-              image: {
-                content: image,
-              },
-              features: [
-                { type: "LABEL_DETECTION", maxResults: 3 }
-                {"type": "CROP_HINTS", "maxResults": 3}
-              ],
-            },
-          ],
-        },
-      },
-      (err, res, body) => {
-        let labels;
-        if (
-          err ||
-          !body.responses ||
-          !body.responses.length ||
-          !body.responses[0].labelAnnotations
-        ) {
-          labels = [];
-        } else {
-          labels = body.responses[0].labelAnnotations;
-        }
-
-
-
-        translate(labels);
-
-
-      }
-    ); */
   }
-
-  setTimeout(endSnap(start), 200);
 };

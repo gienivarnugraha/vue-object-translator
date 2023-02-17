@@ -1,9 +1,7 @@
 
-import {
- cameraReady,
- userAgent,
- showError,
-} from './ref'
+import { cameraReady, userAgent, } from './ref'
+
+import { showError, } from './helpers'
 
 export let stream = ref(null);
 export let video = ref(null);
@@ -19,6 +17,32 @@ const { mediaDevices } = navigator;
 const sourceEnumSupport = mediaDevices && mediaDevices.enumerateDevices;
 const streamTrackSupport = MediaStreamTrack && MediaStreamTrack.getSources;
 const sourceSupport = sourceEnumSupport || streamTrackSupport;
+
+export const requestCamera = () => {
+  if (cameraReady.value) {
+    return;
+  }
+
+  userAgent.value = navigator.userAgent;
+
+  if (mediaDevices && mediaDevices.getUserMedia) {
+    return activateCamera();
+  }
+
+  if (!getUserMedia) {
+    showError(`failed to load the camera: ${error} `);
+    return;
+  }
+
+  if (sourceEnumSupport) {
+    enumerateDevices();
+  } else if (streamTrackSupport) {
+    MediaStreamTrack.getSources((sources) => activateCameraLegacy(sources));
+  } else {
+    activateCameraLegacy(null);
+  }
+};
+
 
 const getUserMedia = (() => {
   const fn =
@@ -61,11 +85,11 @@ const findBestSource = (sources) => {
   return source;
 };
 
-const activateCamera = (noConstraint = true) => {
+export const activateCamera = (facingMode = 'environment', noConstraint = true) => {
   mediaDevices
     .getUserMedia({
       audio: false,
-      video: noConstraint || { facingMode: "environment" },
+      video: { facingMode },
     })
     .then((stream) => {
       cameraSuccess(stream);
@@ -74,13 +98,13 @@ const activateCamera = (noConstraint = true) => {
       console.error(err);
 
       if (!noConstraint && err.name === "ConstraintNotSatisfiedError") {
-        return activateCamera(true);
+        return activateCamera();
       }
 
-     showError( /iPhone|iPad|iPod/i.test(userAgent) && !window.MSStream
+      showError(/iPhone|iPad|iPod/i.test(userAgent) && !window.MSStream
         ? "On iOS, Safari is the only browser allowed to use the camera. Please try using Safari."
-       : "Your browser or device doesn’t allow access to the camera. Please try using a modern browser."
-     )
+        : "Your browser or device doesn’t allow access to the camera. Please try using a modern browser."
+      )
     });
 };
 
@@ -110,7 +134,7 @@ const activateCameraLegacy = (sources) => {
       cameraSuccess(stream);
     },
     (err) => {
-      showError(`error to load video ${err}`)
+      showNotif({ type: 'error', text: `error to load video ${err}` })
     }
   );
 };
@@ -133,28 +157,3 @@ const enumerateDevices = () =>
     .enumerateDevices()
     .then((sources) => activateCameraLegacy(sources))
     .catch(() => activateCameraLegacy(null));
-
-export const requestCamera = () => {
-  if (cameraReady.value) {
-    return;
-  }
-
-  userAgent.value = navigator.userAgent;
-
-  if (mediaDevices && mediaDevices.getUserMedia) {
-    return activateCamera();
-  }
-
-  if (!getUserMedia) {
-    showError(`failed to load the camera: ${error} `);
-    return;
-  }
-
-  if (sourceEnumSupport) {
-    enumerateDevices();
-  } else if (streamTrackSupport) {
-    MediaStreamTrack.getSources((sources) => activateCameraLegacy(sources));
-  } else {
-    activateCameraLegacy(null);
-  }
-};

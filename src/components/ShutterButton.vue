@@ -1,9 +1,13 @@
 <template>
-  <div id="shutter-button" :class="{ busy: loading }" @click="snap"></div>
+  <div
+    id="shutter-button"
+    :class="{ busy: isSnapping, busy: !isModelReady }"
+    @click="snap"
+  ></div>
 </template>
 
 <script setup>
-import { loading } from "@/composables/ref";
+import { isSnapping, isModelReady } from "@/composables/ref";
 import { snap } from "@/composables/snap";
 </script>
 
