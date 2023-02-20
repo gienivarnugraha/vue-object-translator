@@ -17,6 +17,7 @@ import {
   isModelReady,
   performance,
   facingMode,
+  hasFrontCam,
 } from "@/composables/ref";
 
 /* Components */
@@ -71,7 +72,7 @@ const changeCamera = () => {
   if (facingMode.value === "environment") facingMode.value = "user";
   else facingMode.value = "environment";
 
-  activateCamera(facingMode.value);
+  activateCamera();
 };
 
 onMounted(() =>
@@ -86,7 +87,6 @@ onMounted(() =>
 
   <main v-else class="app" @ontouchstart="!fullscreen ? requestFullscreen() : null">
     <div id="shroud"></div>
-
     <section id="setting-view" v-if="!isSnapping">
       <div
         class="setting-icon"
@@ -120,6 +120,9 @@ onMounted(() =>
         v-if="activeView === 'main'"
         :class="{ faded: isSnapping || !isModelReady }"
       >
+        <p>facing mode {{ facingMode }}</p>
+        <p>has front came {{ hasFrontCam }}</p>
+
         <div class="row">
           <h5 class="text title">Source</h5>
           <h2 class="text result">{{ label }}</h2>
