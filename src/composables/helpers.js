@@ -37,9 +37,3 @@ export const showError = (error) => {
   isModelReady.value = true
   throw error
 }
-
-export const showWarning = (error) => {
-  errorMessage.value = error
-  isSnapping.value = false
-  isModelReady.value = true
-}

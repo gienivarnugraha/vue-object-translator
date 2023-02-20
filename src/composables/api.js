@@ -1,9 +1,13 @@
 import axios from "axios";
 import { apiUrls } from "@/config";
-import { setLabelPair } from "./helpers"
+import { setLabelPair, endSnap } from "./helpers"
 import { langMap } from "./lang"
 
-export const onTranslateFail = () => setLabelPair({ lbl: "?", trnslt: "?", gss: "?" });
+export const onTranslateFail = () => {
+  setLabelPair({ lbl: "?", trnslt: "?", gss: "?" })
+
+  setTimeout(endSnap(), 200);
+};
 
 export const translateRequest = async (term, source, target) => {
   try {

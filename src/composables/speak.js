@@ -1,4 +1,4 @@
-import { showError, endSnap, showNotif } from "./helpers";
+import { endSnap, showNotif } from "./helpers";
 
 
 const { speechSynthesis, SpeechSynthesisUtterance } = window;

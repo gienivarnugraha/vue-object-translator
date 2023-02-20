@@ -10,28 +10,29 @@ const canvSize = 640;
 const targetPct = 0.7;
 const targetTop = 0.4;
 
-
 export const snap = async () => {
   startSnap();
 
+  /* detect with mobilenet */
   if (modelConfig.value !== 'google_vision') {
     try {
       const predictions = await detectObjects(video.value)
 
-      console.log(predictions);
+        let labels = predictions.map((prediction) => prediction = {
+          'description': prediction.class,
+          'score': prediction.score,
+        }).sort((labelA, labelB) => labelB.score - labelA.score)
 
-      let labels = predictions.map((prediction) => prediction = {
-        'description': prediction.class,
-        'score': prediction.score,
-      }).sort((labelA, labelB) => labelB.score - labelA.score)
-
-      translate(labels);
+        translate(labels);
 
     } catch (error) {
       showNotif({ type: 'error', text: `failed to load the model ${error}` })
     }
 
   } else {
+
+    /* detect with google vision */
+
     const winW = window.innerWidth;
     const winH = window.innerHeight;
     const vidW = video.value.videoWidth;

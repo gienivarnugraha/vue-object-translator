@@ -1,32 +1,23 @@
 import { speak } from "./speak"
 import { sourceLang, targetLang } from "./lang"
-import {  setLabelPair } from "./helpers"
+import { setLabelPair } from "./helpers"
 import { translateRequest, onTranslateFail } from "./api"
-
-const filterLong = true;
-const lengthLimit = 8;
 
 export let cache = ref({});
 
-export const translate =  async (raw) => {
+export const translate = async (raw) => {
   if (!raw.length) {
     return onTranslateFail();
   }
 
   const labels = raw.map((l) => l.description);
 
-  let filtered = filterLong ? labels.filter((t) => t.length <= lengthLimit) : labels;
-
-  if (!filtered.length) {
-    filtered = labels;
-  }
-
   const gss = raw
     .slice(0, 3)
     .map((o) => `${o.description}: ${Math.round(o.score * 100)}%`)
     .join(", ");
 
-  let term = filtered[0]
+  let term = labels[0]
 
   if (!cache.value[term]) {
     cache.value[term] = {
@@ -41,10 +32,9 @@ export const translate =  async (raw) => {
   let targetCacheHit = cache.value[term].target[targetLang.value];
 
   try {
-    if ( sourceLang.value !== 'english' ) {
-      sourceTranslated =  await translateRequest(term, 'english', sourceLang.value)
-    }
-    else {
+    if (sourceLang.value !== 'english') {
+      sourceTranslated = await translateRequest(term, 'english', sourceLang.value)
+    } else {
       sourceTranslated = term
     }
     cache.value[term].source[sourceLang.value] = sourceTranslated;
@@ -62,10 +52,10 @@ export const translate =  async (raw) => {
     return;
   } else {
     const targetTranslated = await translateRequest(sourceTranslated, sourceLang.value, targetLang.value)
-    cache.value[term].target[targetLang.value]  = targetTranslated
+    cache.value[term].target[targetLang.value] = targetTranslated
 
     setLabelPair({ lbl: sourceTranslated, trnslt: targetTranslated, gss });
-    speak(targetTranslated, targetLang.value, speak.bind(null,  sourceTranslated, sourceLang.value));
+    speak(targetTranslated, targetLang.value, speak.bind(null, sourceTranslated, sourceLang.value));
   }
 
 };
