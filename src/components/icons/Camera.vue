@@ -29,14 +29,30 @@
   width: 12.5vmin !important;
   height: 12.5vmin !important;
   padding: 1.5vmin;
-  bottom: 9vmin;
-  left: 60% !important;
+  bottom: 10vmin;
+  left: 70% !important;
   opacity: 0.8;
-  transform: translateX(-50%);
+  transform: translateX(-70%);
   cursor: pointer;
   transition: opacity 0.2s;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-tap-highlight-color: transparent;
   outline: 0;
+}
+
+@media (max-height: 450px) {
+  #shutter-button {
+    bottom: 12vmin !important;
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+@media (max-height: 800px) {
+  #shutter-button {
+    width: 100px !important;
+    height: 100px !important;
+    padding: 10px !important;
+  }
 }
 </style>

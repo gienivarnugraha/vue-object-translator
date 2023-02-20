@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import Cloud from './Cloud.vue'
+import App from './App.vue'
 
 import Notifications from '@kyvg/vue3-notification'
 
@@ -12,7 +12,7 @@ findIndex.shim()
 
 import './assets/main.css'
 
-const app = createApp(Cloud)
+const app = createApp(App)
 
 app.use(Notifications)
 

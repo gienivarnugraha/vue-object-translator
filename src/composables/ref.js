@@ -21,4 +21,4 @@ export let isLiveStream = ref(false)
 export let isModelReady = ref(true)
 
 export let facingMode = ref('auto')
-export let hasFrontCam = ref(false)
+export let hasMultipleCamera = ref(false)

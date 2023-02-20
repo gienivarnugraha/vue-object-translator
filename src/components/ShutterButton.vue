@@ -53,11 +53,9 @@ import { snap } from "@/composables/snap";
 
 @media (max-height: 800px) {
   #shutter-button {
-    width: 100px !important;
-    height: 100px !important;
+    width: 75px !important;
+    height: 75px !important;
     padding: 10px !important;
-    width: 10vmin !important;
-    height: 10vmin !important;
     bottom: 10vmin !important;
   }
 }

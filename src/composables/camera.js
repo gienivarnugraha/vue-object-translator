@@ -1,5 +1,5 @@
 
-import { cameraReady, hasFrontCam, userAgent, facingMode} from './ref'
+import { cameraReady, userAgent, facingMode,  hasMultipleCamera } from './ref'
 
 import { showError, showNotif } from './helpers'
 
@@ -92,16 +92,19 @@ export const activateCamera = async (noConstraint = true) => {
     }
   };
 
-  console.log(constraints);
-
   try {
-    let stream = await mediaDevices.getUserMedia(constraints)
+    if (cameraReady.value && stream.value) {
+      console.log(stream.value);
+      stream.value.getTracks().forEach(track => track.stop());
+    }
 
-    cameraSuccess(stream)
+    let strm = await mediaDevices.getUserMedia(constraints)
+
+    cameraSuccess(strm)
   } catch (err) {
     console.error(err);
     if (err.name === 'OverconstrainedError') {
-      showNotif({ type: 'error', text: `Your device doesn't have a rear camera` })
+      showError(`Your device doesn't have a rear camera`)
     }
 
     if (!noConstraint && err.name === "ConstraintNotSatisfiedError") {
@@ -127,6 +130,8 @@ const narrowDownFacingMode = async () => {
     .filter(({ kind }) => kind === "videoinput")
     .filter(({ label }) => !label.includes("infrared"));
 
+  console.log(devices);
+
   if (devices.length > 2) {
     // Explicitly picking the first entry in the list of all videoinput
     // devices for as the default front camera and the last entry as the default
@@ -134,7 +139,7 @@ const narrowDownFacingMode = async () => {
     const frontCamera = devices[0];
     const rearCamera = devices[devices.length - 1];
 
-    hasFrontCam.value = true
+    hasMultipleCamera.value = true
 
     switch (facingMode.value) {
       case "auto":
