@@ -1,7 +1,7 @@
 
 import { cameraReady, hasFrontCam, userAgent, facingMode} from './ref'
 
-import { showError, } from './helpers'
+import { showError, showNotif } from './helpers'
 
 export let stream = ref(null);
 export let video = ref(null);
@@ -9,8 +9,6 @@ export let ctx = ref(null);
 export let canvas = ref(null);
 
 let attemptedTwice = ref(false);
-
-const { body } = window.document;
 
 const { MediaStreamTrack } = window;
 const { mediaDevices } = navigator;
@@ -94,12 +92,17 @@ export const activateCamera = async (noConstraint = true) => {
     }
   };
 
+  console.log(constraints);
+
   try {
     let stream = await mediaDevices.getUserMedia(constraints)
 
     cameraSuccess(stream)
   } catch (err) {
     console.error(err);
+    if (err.name === 'OverconstrainedError') {
+      showNotif({ type: 'error', text: `Your device doesn't have a rear camera` })
+    }
 
     if (!noConstraint && err.name === "ConstraintNotSatisfiedError") {
       return activateCamera();

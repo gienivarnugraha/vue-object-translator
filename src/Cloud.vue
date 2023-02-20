@@ -69,8 +69,8 @@ const changeLang = (lang) => {
 };
 
 const changeCamera = () => {
-  if (facingMode.value === "environment") facingMode.value = "user";
-  else facingMode.value = "environment";
+  if (facingMode.value === "rear") facingMode.value = "front";
+  else facingMode.value = "rear";
 
   activateCamera();
 };
