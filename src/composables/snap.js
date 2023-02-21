@@ -2,7 +2,7 @@ import { translate } from "./translate"
 import { modelConfig } from "./ref"
 import { video, canvas, ctx } from "./camera"
 import { detectObjects } from "./model"
-import { startSnap, showNotif } from "./helpers"
+import { startSnap, showNotif, endSnap } from "./helpers"
 import { detectRequest } from "./api"
 
 const breakPoint = 800;
@@ -18,12 +18,14 @@ export const snap = async () => {
     try {
       const predictions = await detectObjects(video.value)
 
-        let labels = predictions.map((prediction) => prediction = {
-          'description': prediction.class,
-          'score': prediction.score,
-        }).sort((labelA, labelB) => labelB.score - labelA.score)
+      let labels = predictions.map((prediction) => prediction = {
+        'description': prediction.class,
+        'score': prediction.score,
+      }).sort((labelA, labelB) => labelB.score - labelA.score)
 
-        translate(labels);
+      endSnap()
+
+      translate(labels);
 
     } catch (error) {
       showNotif({ type: 'error', text: `failed to load the model ${error}` })
@@ -66,6 +68,8 @@ export const snap = async () => {
       .replace("data:image/jpeg;base64,", "");
 
     const labels = await detectRequest(image)
+
+    endSnap()
 
     translate(labels);
   }

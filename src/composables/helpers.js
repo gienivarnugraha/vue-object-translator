@@ -3,6 +3,10 @@ import { isSnapping, firstTime, performance, label, translation, guesses, camera
 
 import { useNotification } from "@kyvg/vue3-notification";
 
+const { notify } = useNotification()
+
+export const showNotif = ({ type, text }) => notify({ type, text, });
+
 let start
 
 export const startSnap = () => {
@@ -11,10 +15,6 @@ export const startSnap = () => {
   start = new Date().getTime()
 };
 
-
-const { notify } = useNotification()
-
-export const showNotif = ({ type, text }) => notify({ type, text, });
 
 export const endSnap = () => {
   isSnapping.value = false;

@@ -39,7 +39,7 @@ export const speak = (text, lang, cb) => {
     cb && cb();
   }
 
-  setTimeout(endSnap(), 200);
+  // setTimeout(endSnap(), 200);
 
 };
 
